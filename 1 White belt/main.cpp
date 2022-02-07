@@ -92,18 +92,60 @@ bool operator<(const Date &lhs, const Date &rhs) {
 
 class Database {
 public:
-    void AddEvent(const Date &date, const string &event);
+    void AddEvent(const Date &date, const string &event) {
+        storage[date].insert(event);
+    };
 
-    bool DeleteEvent(const Date &date, const string &event);
+    bool DeleteEvent(const Date &date, const string &event) {
+        if (storage.count(date) > 0 && storage[date].count(event) > 0) {
+            storage[date].erase(event);
+            return true;
+        }
+        return false;
+    };
 
-    int DeleteDate(const Date &date);
+    int DeleteDate(const Date &date) {
+        if (storage.count(date) > 0) {
+            int events_count = storage[date].size();
+            storage.erase(date);
+            return events_count;
+        }
+        return 0;
+    };
 
-    string Find(const Date &date) const;
+    set<string> Find(const Date &date) const {
+        if (storage.count(date) > 0) {
+            return storage.at(date);
+        }
+        return {};
+    };
 
-    void Print() const;
+    string Print() const {
+        ostringstream sstream;
+        bool first = true;
+        for (const auto &[date, events]: storage) {
+            if (!first) {
+                sstream << endl;
+            }
+            first = false;
+
+            bool first_inner = true;
+            for (const auto &event: events) {
+                if (!first_inner) {
+                    sstream << endl;
+                }
+                first_inner = false;
+                sstream << date << " " << event;
+            }
+        }
+        return sstream.str();
+    };
+
+private:
+    map<Date, set<string>> storage;
 };
 
-void ProcessQuery(Database &db, const string &query) {
+string ProcessQuery(Database &db, const string &query) {
     // ignore empty commands
     if (!query.empty()) {
         istringstream sstream(query);
@@ -113,22 +155,41 @@ void ProcessQuery(Database &db, const string &query) {
             string date_input, event;
             sstream >> date_input >> event;
             const Date date = ParseDate(date_input);
-
+            db.AddEvent(date, event);
         } else if (command == "Find") {
             string date_input;
             sstream >> date_input;
             const Date date = ParseDate(date_input);
-
+            ostringstream output;
+            bool first = true;
+            for (const string &event: db.Find(date)) {
+                if (!first) {
+                    output << endl;
+                }
+                first = false;
+                output << event;
+            }
+            return output.str();
         } else if (command == "Del") {
-            string date, event;
-            sstream >> date >> event;
-
+            string date_input, event;
+            sstream >> date_input >> event;
+            const Date date = ParseDate(date_input);
+            if (event.empty()) {
+                int deleted_count = db.DeleteDate(date);
+                return "Deleted " + to_string(deleted_count) + " events";
+            } else {
+                if (db.DeleteEvent(date, event)) {
+                    return "Deleted successfully";
+                }
+                return "Event not found";
+            }
         } else if (command == "Print") {
-
+            return db.Print();
         } else {
             throw runtime_error("Unknown command: " + command);
         }
     }
+    return "";
 }
 
 /* --------------------------------------TESTING----------------------------------------------
@@ -136,30 +197,6 @@ void ProcessQuery(Database &db, const string &query) {
  * This framework was developed during the second course of the specialization ("Yellow belt").
  * It is based only on the students' c++ language knowledge after the first two courses.
  */
-
-string ProcessQueryException(Database &db, const string &query) {
-    // Return string from the exception thrown in the ProcessQuery function.
-    // If no exception was thrown, return string "no exception".
-    try {
-        ProcessQuery(db, query);
-    } catch (exception &e) {
-        return static_cast<string>(e.what());
-    }
-    return "no exception";
-}
-
-void TestProcessQuery() {
-    Database db;
-    string input, expected;
-
-    expected = "Unknown command: ";
-
-    input = "XXX";
-    AssertEqual(ProcessQueryException(db, input), expected + input, "Unknown command");
-
-    input = "";
-    AssertEqual(ProcessQueryException(db, input), "no exception", "Empty command");
-}
 
 string ParseDateException(const string &date) {
     // Return string from the exception thrown in the ParseDate function.
@@ -259,11 +296,63 @@ void TestDateParser() {
 
 }
 
+string ProcessQueryException(Database &db, const string &query) {
+    // Return string from the exception thrown in the ProcessQuery function.
+    // If no exception was thrown, return string "no exception".
+    try {
+        ProcessQuery(db, query);
+    } catch (exception &e) {
+        return static_cast<string>(e.what());
+    }
+    return "no exception";
+}
+
+void TestProcessQuery() {
+    Database db;
+    string input, expected;
+
+    expected = "Unknown command: ";
+
+    input = "XXX";
+    AssertEqual(ProcessQueryException(db, input), expected + input, "Unknown command");
+
+    input = "";
+    AssertEqual(ProcessQueryException(db, input), "no exception", "Empty command");
+
+    // Test database functionality
+
+    AssertEqual(ProcessQuery(db, "Find 0-1-2"), "", "Find on the empty db");
+
+    ProcessQuery(db, "Add 0-1-2 event1");
+    AssertEqual(ProcessQuery(db, "Find 0-1-2"), "event1", "Add event");
+
+    ProcessQuery(db, "Add 0-1-2 event1");
+    ProcessQuery(db, "Add 0-1-2 event2");
+    AssertEqual(ProcessQuery(db, "Find 0-1-2"), "event1\nevent2", "Add events at the same date");
+
+    AssertEqual(ProcessQuery(db, "Del 0-1-2"), "Deleted 2 events", "Delete events");
+
+    AssertEqual(ProcessQuery(db, "Print"), "", "Print events on empty db");
+
+    ProcessQuery(db, "Add 0-1-2 event1");
+    ProcessQuery(db, "Add 0-2-3 event2");
+    AssertEqual(ProcessQuery(db, "Del 0-1-2"), "Deleted 1 events", "Delete event");
+    AssertEqual(ProcessQuery(db, "Del 0-1-2"), "Deleted 0 events", "Delete event on date with no events");
+    AssertEqual(ProcessQuery(db, "Del 0-2-3 event2"), "Deleted successfully", "Delete event");
+    AssertEqual(ProcessQuery(db, "Del 0-2-3 event2"), "Event not found", "Delete not existing event");
+
+    ProcessQuery(db, "Add 0-1-2 event1");
+    ProcessQuery(db, "Add 0-1-2 event2");
+    ProcessQuery(db, "Add 0-2-3 event3");
+    expected = "0000-01-02 event1\n0000-01-02 event2\n0000-02-03 event3";
+    AssertEqual(ProcessQuery(db, "Print"), expected, "Print added events");
+
+}
+
 void TestAll() {
     TestRunner runner = TestRunner();
     runner.RunTest(TestProcessQuery, "TestInvalidCommand");
     runner.RunTest(TestDateParser, "TestDateParser");
-
 }
 
 
@@ -276,7 +365,7 @@ int main() {
     string query;
     while (getline(cin, query)) {
         try {
-            ProcessQuery(db, query);
+            cout << ProcessQuery(db, query) << endl;
         } catch (exception &e) {
             cout << e.what();
             return 0;
