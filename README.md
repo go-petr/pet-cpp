@@ -1,5 +1,8 @@
 # Courses and final projects short descriptions
 This repository includes the solutions to the final projects of "<a href="https://www.coursera.org/specializations/c-plus-plus-modern-development" target="_blank">Modern C++ Software Development</a>" coursera specialization.
+<div>
+    <img src="https://github.com/go-petr/study-cpp/blob/master/yandex_cpp_blets.jpg">
+</div>
 
 ### White belt
 The first course is about getting to know the C++ programming language. It introduces: IO streams, conditional statements, loops, basic data types, functions, containers, variables' scopes, stucts, classes, constructors, operators' overloading, const keyword, and exceptions.
