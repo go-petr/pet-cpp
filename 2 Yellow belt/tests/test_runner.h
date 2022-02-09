@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <vector>
 
 using namespace std;
 
@@ -11,6 +12,20 @@ using namespace std;
 template <class T>
 ostream& operator << (ostream& os, const pair<T, T>& p) {
     os << "{" << p.first << ", " << p.second;
+    return os << "}";
+}
+
+template <class T>
+ostream& operator << (ostream& os, const vector<T>& s) {
+    os << "{";
+    bool first = true;
+    for (const auto& x : s) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        os << x;
+    }
     return os << "}";
 }
 
