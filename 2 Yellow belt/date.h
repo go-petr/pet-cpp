@@ -20,6 +20,8 @@ private:
 
 ostream &operator<<(ostream &stream, const Date &date);
 
+bool operator<(const Date &lhs, const Date &rhs);
+
 bool operator==(const Date &lhs, const Date &rhs);
 
 Date ParseDate(istringstream &is);

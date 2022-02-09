@@ -38,6 +38,10 @@ ostream &operator<<(ostream &stream, const Date &date) {
     return stream;
 }
 
+bool operator<(const Date &lhs, const Date &rhs) {
+    return tuple(lhs.GetYear(), lhs.GetMonth(), lhs.GetDay()) < tuple(rhs.GetYear(), rhs.GetMonth(), rhs.GetDay());
+};
+
 
 bool operator==(const Date &lhs, const Date &rhs) {
     return tuple(lhs.GetYear(), lhs.GetMonth(), lhs.GetDay()) == tuple(rhs.GetYear(), rhs.GetMonth(), rhs.GetDay());

@@ -89,5 +89,5 @@ void TestAll() {
     TestRunner tr;
 //    tr.RunTest(TestParseEvent, "TestParseEvent");
     tr.RunTest(TestParseDate, "TestParseDate");
-//    tr.RunTest(TestParseCondition, "TestParseCondition");
+    tr.RunTest(TestParseCondition, "TestParseCondition");
 }
