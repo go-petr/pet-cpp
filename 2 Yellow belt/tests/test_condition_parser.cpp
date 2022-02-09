@@ -1,7 +1,7 @@
-#include "condition_parser.h"
-#include "../../2 yellow/test_runner.h"
-
+#include "../condition_parser.h"
+#include "test_runner.h"
 #include <sstream>
+
 using namespace std;
 
 void TestParseCondition() {
