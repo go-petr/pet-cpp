@@ -28,4 +28,4 @@ bool operator!=(const Date& lhs, const Date& rhs);
 
 Date ParseDate(istream& dateStream);
 
-//void TestParseDate();
+void TestParseDate();

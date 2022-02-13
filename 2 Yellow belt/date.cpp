@@ -10,10 +10,10 @@ using namespace std;
 
 Date::Date(const int& newYear, const int& newMonth, const int& newDay) {
     if (newMonth < 1 || newMonth > 12) {
-        throw runtime_error("month Value is invalid: " + to_string(newMonth));
+        throw runtime_error("Month value is invalid: " + to_string(newMonth));
     }
     if (newDay < 1 || newDay > 31) {
-        throw runtime_error("day Value is invalid: " + to_string(newDay));
+        throw runtime_error("Day value is invalid: " + to_string(newDay));
     }
     year = newYear;
     month = newMonth;
@@ -57,6 +57,7 @@ bool operator!=(const Date& lhs, const Date& rhs) {
 
 
 Date ParseDate(istream& dateStream) {
+    auto p = dateStream.tellg();
 
     bool ok = true;
 
@@ -75,6 +76,8 @@ Date ParseDate(istream& dateStream) {
 
     if (!ok) {
         string input;
+        dateStream.clear();
+        dateStream.seekg(p, std::ios_base::beg);
         getline(dateStream, input);
         throw logic_error("Wrong date format: " + input);
     }

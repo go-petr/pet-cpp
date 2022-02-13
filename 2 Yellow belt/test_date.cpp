@@ -2,6 +2,7 @@
 #include "test_runner.h"
 #include <string>
 #include <tuple>
+#include <sstream>
 
 
 using namespace std;

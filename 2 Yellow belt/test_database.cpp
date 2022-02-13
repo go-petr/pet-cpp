@@ -1,14 +1,14 @@
-#include "../test_runner.h"
-#include "../database.h"
-#include "../date.h"
-#include "../condition_parser.h"
+#include "test_runner.h"
+#include "database.h"
+#include "date.h"
+#include "condition_parser.h"
 #include <string>
 
 
-function<bool(const Date &, const string &)> GetPredicateFromStr(const string &s) {
+function<bool(const Date&, const string&)> GetPredicateFromStr(const string& s) {
     istringstream is(s);
     auto condition = ParseCondition(is);
-    auto predicate = [condition](const Date &date, const string &event) {
+    auto predicate = [condition](const Date& date, const string& event) {
         return condition->Evaluate(date, event);
     };
     return predicate;
@@ -48,7 +48,7 @@ void TestDatabaseAdd() {
 
         AssertEqual(os.str(), "0001-01-01 event1\n0001-01-02 event2\n"
                               "0001-01-02 event1\n0001-01-03 event1\n",
-                    "Print data ascending, events by insertion order");
+                "Print data ascending, events by insertion order");
     }
 }
 
@@ -79,7 +79,7 @@ void TestDatabaseRemoveIf() {
         Database db;
         db.Add(Date(1, 1, 1), "event1");
         auto predicate = GetPredicateFromStr("event != \"holiday\"");
-        db.RemoveIf(predicate);
+        AssertEqual(db.RemoveIf(predicate), 1, "Delete one event if !=");
         db.Add(Date(1, 1, 1), "event1");
         ostringstream os;
         db.Print(os);
@@ -102,9 +102,9 @@ void TestDatabaseRemoveIf() {
         db.Print(os);
 
         AssertEqual(os.str(), "1000-01-01 event1\n3000-01-01 holiday\n3000-01-01 sport event\n",
-                    "Print after complex condition");
+                "Print after complex condition");
     }
-};
+}
 
 void TestDatabaseFindIf() {
     {
@@ -112,39 +112,39 @@ void TestDatabaseFindIf() {
         db.Add(Date(1, 1, 1), "event1");
         auto predicate = GetPredicateFromStr("");
 
-        vector<string> expected = {"0001-01-01 event1"};
+        vector<string> expected = { "0001-01-01 event1" };
         vector<string> result = db.FindIf(predicate);
         AssertEqual(result, expected, "FindIf with empty condition");
     }
     {
         Database db;
         db.Add(Date(2017, 1, 1), "Holiday");
-        db.Add(Date(2017, 3,8), "Holiday");
-        db.Add(Date(2017, 1, 1), "New Year");
+        db.Add(Date(2017, 3, 8), "Holiday");
+        db.Add(Date(2017, 1, 1), "New year");
         auto predicate = GetPredicateFromStr("event != \"working day\"");
         vector<string> result = db.FindIf(predicate);
         db.Add(Date(2017, 05, 9), "Holiday");
-        vector<string> expected = {"2017-01-01 Holiday", "2017-01-01 New Year", "2017-03-08 Holiday"};
+        vector<string> expected = { "2017-01-01 Holiday", "2017-01-01 New year", "2017-03-08 Holiday" };
 
         AssertEqual(result, expected, "FindIf with empty condition");
     }
-};
+}
 
 void TestDatabaseLast() {
     {
         Database db;
-        db.Add(Date(2017, 1, 1), "New Year");
-        db.Add(Date(2017, 3,8), "Holiday");
+        db.Add(Date(2017, 1, 1), "New year");
+        db.Add(Date(2017, 3, 8), "Holiday");
         db.Add(Date(2017, 1, 1), "Holiday");
         string result;
         {
             istringstream is("2016-12-31");
             try {
                 result = db.Last(ParseDate(is));
-            } catch (invalid_argument &) {
+            }
+            catch (invalid_argument&) {
                 result = "No entries";
             }
-
             AssertEqual(result, "No entries", "Last with date less than all");
         }
         {
@@ -156,5 +156,17 @@ void TestDatabaseLast() {
             AssertEqual(db.Last(ParseDate(is)), "2017-03-08 Holiday", "Last event at the last date");
         }
     }
+    {
+        Database db;
+        string result;
+        istringstream is("1-1-1");
+        try {
+            result = db.Last(ParseDate(is));
+        }
+        catch (invalid_argument&) {
+            result = "No entries";
+        }
+        AssertEqual(result, "No entries", "Last on empty db");
+    }
 
-};
+}
