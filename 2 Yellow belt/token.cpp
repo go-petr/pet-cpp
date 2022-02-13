@@ -19,64 +19,83 @@ vector<Token> Tokenize(istream& cl) {
                     date += cl.get(); // Consume '-'
                 }
             }
-            tokens.push_back({date, TokenType::DATE});
-        } else if (c == '"') {
+            tokens.push_back({ date, TokenType::DATE });
+        }
+        else if (c == '"') {
             string event;
             getline(cl, event, '"');
-            tokens.push_back({event, TokenType::EVENT});
-        } else if (c == 'd') {
+            tokens.push_back({ event, TokenType::EVENT });
+        }
+        else if (c == 'd') {
             if (cl.get() == 'a' && cl.get() == 't' && cl.get() == 'e') {
-                tokens.push_back({"date", TokenType::COLUMN});
-            } else {
+                tokens.push_back({ "date", TokenType::COLUMN });
+            }
+            else {
                 throw logic_error("Unknown token");
             }
-        } else if (c == 'e') {
+        }
+        else if (c == 'e') {
             if (cl.get() == 'v' && cl.get() == 'e' && cl.get() == 'n' &&
                 cl.get() == 't') {
-                tokens.push_back({"event", TokenType::COLUMN});
-            } else {
+                tokens.push_back({ "event", TokenType::COLUMN });
+            }
+            else {
                 throw logic_error("Unknown token");
             }
-        } else if (c == 'A') {
+        }
+        else if (c == 'A') {
             if (cl.get() == 'N' && cl.get() == 'D') {
-                tokens.push_back({"AND", TokenType::LOGICAL_OP});
-            } else {
+                tokens.push_back({ "AND", TokenType::LOGICAL_OP });
+            }
+            else {
                 throw logic_error("Unknown token");
             }
-        } else if (c == 'O') {
+        }
+        else if (c == 'O') {
             if (cl.get() == 'R') {
-                tokens.push_back({"OR", TokenType::LOGICAL_OP});
-            } else {
+                tokens.push_back({ "OR", TokenType::LOGICAL_OP });
+            }
+            else {
                 throw logic_error("Unknown token");
             }
-        } else if (c == '(') {
-            tokens.push_back({"(", TokenType::PAREN_LEFT});
-        } else if (c == ')') {
-            tokens.push_back({")", TokenType::PAREN_RIGHT});
-        } else if (c == '<') {
+        }
+        else if (c == '(') {
+            tokens.push_back({ "(", TokenType::PAREN_LEFT });
+        }
+        else if (c == ')') {
+            tokens.push_back({ ")", TokenType::PAREN_RIGHT });
+        }
+        else if (c == '<') {
             if (cl.peek() == '=') {
                 cl.get();
-                tokens.push_back({"<=", TokenType::COMPARE_OP});
-            } else {
-                tokens.push_back({"<", TokenType::COMPARE_OP});
+                tokens.push_back({ "<=", TokenType::COMPARE_OP });
             }
-        } else if (c == '>') {
+            else {
+                tokens.push_back({ "<", TokenType::COMPARE_OP });
+            }
+        }
+        else if (c == '>') {
             if (cl.peek() == '=') {
                 cl.get();
-                tokens.push_back({">=", TokenType::COMPARE_OP});
-            } else {
-                tokens.push_back({">", TokenType::COMPARE_OP});
+                tokens.push_back({ ">=", TokenType::COMPARE_OP });
             }
-        } else if (c == '=') {
+            else {
+                tokens.push_back({ ">", TokenType::COMPARE_OP });
+            }
+        }
+        else if (c == '=') {
             if (cl.get() == '=') {
-                tokens.push_back({"==", TokenType::COMPARE_OP});
-            } else {
+                tokens.push_back({ "==", TokenType::COMPARE_OP });
+            }
+            else {
                 throw logic_error("Unknown token");
             }
-        } else if (c == '!') {
+        }
+        else if (c == '!') {
             if (cl.get() == '=') {
-                tokens.push_back({"!=", TokenType::COMPARE_OP});
-            } else {
+                tokens.push_back({ "!=", TokenType::COMPARE_OP });
+            }
+            else {
                 throw logic_error("Unknown token");
             }
         }

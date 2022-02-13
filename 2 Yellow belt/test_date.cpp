@@ -1,4 +1,4 @@
-#include "../date.h"
+#include "date.h"
 #include "test_runner.h"
 #include <string>
 #include <tuple>
@@ -6,12 +6,13 @@
 
 using namespace std;
 
-string ParseDateException(istringstream &date_stream) {
+string ParseDateException(istringstream& date_stream) {
     // Return string from the exception thrown in the ParseDate function.
     // If no exception was thrown, return string "no exception".
     try {
-        Date bad_date = ParseDate(date_stream);
-    } catch (exception &e) {
+        ParseDate(date_stream);
+    }
+    catch (exception& e) {
         return static_cast<string>(e.what());
     }
     return "no exception";
@@ -94,25 +95,29 @@ void TestParseDate() {
     {
         input = "-100-1-1";
         istringstream istream(input);
-        AssertEqual(ParseDate(istream), Date(-100, 1, 1), "Negative year");
+        Date result = ParseDate(istream);
+        AssertEqual(result, Date(-100, 1, 1), "Negative year");
     }
 
     {
         input = "+100-1-1";
         istringstream istream(input);
-        AssertEqual(ParseDate(istream), Date(100, 1, 1), "+ sign before year");
+        Date result = ParseDate(istream);
+        AssertEqual(result, Date(100, 1, 1), "+ sign before year");
     }
 
     {
         input = "1-+1-1";
         istringstream istream(input);
-        AssertEqual(ParseDate(istream), Date(1, 1, 1), "+ sign before month");
+        Date result = ParseDate(istream);
+        AssertEqual(result, Date(1, 1, 1), "+ sign before month");
     }
 
     {
         input = "1-1-+1";
         istringstream istream(input);
-        AssertEqual(ParseDate(istream), Date(1, 1, 1), "+ sign before day");
+        Date result = ParseDate(istream);
+        AssertEqual(result, Date(1, 1, 1), "+ sign before day");
     }
 
     {

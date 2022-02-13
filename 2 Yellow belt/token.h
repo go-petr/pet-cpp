@@ -30,8 +30,8 @@ enum class TokenType {
 };
 
 struct Token {
-    const string value;
-    const TokenType type;
+    const string Value;
+    const TokenType Type;
 };
 
-vector<Token> Tokenize(istream &cl);
+vector<Token> Tokenize(istream& cl);

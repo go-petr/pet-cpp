@@ -2,15 +2,17 @@
 #include "token.h"
 
 #include <map>
+
 using namespace std;
 
-template <class It> shared_ptr<Node> ParseComparison(It& current, It end) {
+template<class It>
+shared_ptr<Node> ParseComparison(It& current, It end) {
     if (current == end) {
         throw logic_error("Expected column name: date or event");
     }
 
     Token& column = *current;
-    if (column.type != TokenType::COLUMN) {
+    if (column.Type != TokenType::COLUMN) {
         throw logic_error("Expected column name: date or event");
     }
     ++current;
@@ -20,44 +22,51 @@ template <class It> shared_ptr<Node> ParseComparison(It& current, It end) {
     }
 
     Token& op = *current;
-    if (op.type != TokenType::COMPARE_OP) {
+    if (op.Type != TokenType::COMPARE_OP) {
         throw logic_error("Expected comparison operation");
     }
     ++current;
 
     if (current == end) {
-        throw logic_error("Expected right value of comparison");
+        throw logic_error("Expected right Value of comparison");
     }
 
     Comparison cmp;
-    if (op.value == "<") {
+    if (op.Value == "<") {
         cmp = Comparison::Less;
-    } else if (op.value == "<=") {
+    }
+    else if (op.Value == "<=") {
         cmp = Comparison::LessOrEqual;
-    } else if (op.value == ">") {
+    }
+    else if (op.Value == ">") {
         cmp = Comparison::Greater;
-    } else if (op.value == ">=") {
+    }
+    else if (op.Value == ">=") {
         cmp = Comparison::GreaterOrEqual;
-    } else if (op.value == "==") {
+    }
+    else if (op.Value == "==") {
         cmp = Comparison::Equal;
-    } else if (op.value == "!=") {
+    }
+    else if (op.Value == "!=") {
         cmp = Comparison::NotEqual;
-    } else {
-        throw logic_error("Unknown comparison token: " + op.value);
+    }
+    else {
+        throw logic_error("Unknown comparison token: " + op.Value);
     }
 
-    const string& value = current->value;
+    const string& value = current->Value;
     ++current;
 
-    if (column.value == "date") {
+    if (column.Value == "date") {
         istringstream is(value);
         return make_shared<DateComparisonNode>(cmp, ParseDate(is));
-    } else {
+    }
+    else {
         return make_shared<EventComparisonNode>(cmp, value);
     }
 }
 
-template <class It>
+template<class It>
 shared_ptr<Node> ParseExpression(It& current, It end, unsigned precedence) {
     if (current == end) {
         return shared_ptr<Node>();
@@ -65,37 +74,39 @@ shared_ptr<Node> ParseExpression(It& current, It end, unsigned precedence) {
 
     shared_ptr<Node> left;
 
-    if (current->type == TokenType::PAREN_LEFT) {
+    if (current->Type == TokenType::PAREN_LEFT) {
         ++current; // consume '('
         left = ParseExpression(current, end, 0u);
-        if (current == end || current->type != TokenType::PAREN_RIGHT) {
+        if (current == end || current->Type != TokenType::PAREN_RIGHT) {
             throw logic_error("Missing right paren");
         }
         ++current; // consume ')'
-    } else {
+    }
+    else {
         left = ParseComparison(current, end);
     }
 
     const map<LogicalOperation, unsigned> precedences = {
-            {LogicalOperation::Or, 1}, {LogicalOperation::And, 2}
+            { LogicalOperation::Or,  1 },
+            { LogicalOperation::And, 2 }
     };
 
-    while (current != end && current->type != TokenType::PAREN_RIGHT) {
-        if (current->type != TokenType::LOGICAL_OP) {
+    while (current != end && current->Type != TokenType::PAREN_RIGHT) {
+        if (current->Type != TokenType::LOGICAL_OP) {
             throw logic_error("Expected logic operation");
         }
 
-        const auto logical_operation = current->value == "AND" ? LogicalOperation::And
-                                                               : LogicalOperation::Or;
-        const auto current_precedence = precedences.at(logical_operation);
-        if (current_precedence <= precedence) {
+        const auto logicalOperation = current->Value == "AND" ? LogicalOperation::And
+                                                              : LogicalOperation::Or;
+        const auto currentPrecedence = precedences.at(logicalOperation);
+        if (currentPrecedence <= precedence) {
             break;
         }
 
         ++current; // consume op
 
         left = make_shared<LogicalOperationNode>(
-                logical_operation, left, ParseExpression(current, end, current_precedence)
+                logicalOperation, left, ParseExpression(current, end, currentPrecedence)
         );
     }
 
@@ -105,15 +116,15 @@ shared_ptr<Node> ParseExpression(It& current, It end, unsigned precedence) {
 shared_ptr<Node> ParseCondition(istream& is) {
     auto tokens = Tokenize(is);
     auto current = tokens.begin();
-    auto top_node = ParseExpression(current, tokens.end(), 0u);
+    auto topNode = ParseExpression(current, tokens.end(), 0u);
 
-    if (!top_node) {
-        top_node = make_shared<EmptyNode>();
+    if (!topNode) {
+        topNode = make_shared<EmptyNode>();
     }
 
     if (current != tokens.end()) {
         throw logic_error("Unexpected tokens after condition");
     }
 
-    return top_node;
+    return topNode;
 }
